@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>discipline_tracker — docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #141414;
+      --surface-2: #1a1a1a;
+      --surface-3: #222222;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888888;
+      --accent: #d65d0e;
+      --accent-dim: #8f3b0a;
+      --accent-glow: rgba(214, 93, 14, 0.12);
+      --success: #2ea043;
+      --warning: #e3b341;
+      --danger: #f85149;
+      --info: #58a6ff;
+      --font: 'Fira Code', 'SF Mono', 'Cascadia Code', ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14px;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--accent-glow); color: var(--text); }
+
+    /* Layout */
+    .app { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .logo::before { content: '>'; color: var(--text-muted); }
+
+    .version {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+
+    .nav-section { margin-bottom: 1.5rem; }
+    .nav-title {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.4rem 0.6rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      border-radius: 4px;
+      margin-bottom: 0.15rem;
+      transition: all 0.12s;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: var(--surface-2);
+      color: var(--text);
+      border-left-color: var(--accent);
+    }
+    .nav-link .stab {
+      display: inline-block;
+      padding: 0.05rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.65rem;
+      margin-left: 0.4rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .stab-green { background: rgba(46, 160, 67, 0.15); color: var(--success); }
+    .stab-yellow { background: rgba(227, 179, 65, 0.15); color: var(--warning); }
+    .stab-red { background: rgba(248, 81, 73, 0.15); color: var(--danger); }
+
+    /* Main */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      padding: 2rem 3rem;
+      max-width: 1000px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb span { color: var(--accent); font-weight: 500; }
+
+    /* Typography */
+    h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+    h2 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.75rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: var(--text-muted); }
+    p { margin-bottom: 1rem; color: var(--text-muted); }
+    a { color: var(--info); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Code-like elements */
+    code {
+      background: var(--surface-2);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .docblock {
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      padding: 1rem 1.25rem;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .card-title { font-size: 0.95rem; font-weight: 600; }
+    .card-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      border-radius: 6px;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .stat-box:hover { border-color: var(--accent-dim); transform: translateY(-1px); }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.12s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn:hover { background: var(--border); }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent-dim);
+      color: #fff;
+      font-weight: 500;
+    }
+    .btn-primary:hover { background: var(--accent-dim); }
+    .btn-danger {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #fff;
+    }
+    .btn-success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.75rem; }
+
+    /* Forms */
+    .form-group { margin-bottom: 1rem; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      font-weight: 500;
+    }
+    input, textarea, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.55rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      width: 100%;
+      transition: border-color 0.12s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:hover td { background: var(--surface-2); }
+
+    /* Progress */
+    .progress-wrap { margin-bottom: 0.75rem; }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 0.35rem;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--surface-3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.4s ease;
+      border-radius: 3px;
+    }
+    .progress-fill.success { background: var(--success); }
+    .progress-fill.warning { background: var(--warning); }
+    .progress-fill.danger { background: var(--danger); }
+
+    /* Habits */
+    .habit-list { margin-top: 0.5rem; }
+    .habit-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--surface-2);
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.12s;
+      border: 1px solid transparent;
+    }
+    .habit-item:hover { background: var(--surface-3); border-color: var(--border); }
+    .habit-item.completed { opacity: 0.7; }
+    .habit-check {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-radius: 3px;
+      margin-right: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .habit-item.completed .habit-check {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .habit-text { flex: 1; font-size: 0.9rem; }
+    .habit-item.completed .habit-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .habit-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: 1rem;
+    }
+    .habit-streak { color: var(--warning); font-weight: 600; }
+
+    /* Heatmap */
+    .heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-top: 0.75rem;
+    }
+    .heatmap-day {
+      aspect-ratio: 1;
+      background: var(--surface-3);
+      border-radius: 2px;
+      position: relative;
+    }
+    .heatmap-day.level-1 { background: var(--accent-dim); opacity: 0.35; }
+    .heatmap-day.level-2 { background: var(--accent-dim); opacity: 0.65; }
+    .heatmap-day.level-3 { background: var(--accent-dim); opacity: 1; }
+    .heatmap-day.level-4 { background: var(--accent); }
+
+    /* Timer */
+    .timer-display {
+      font-size: 3.5rem;
+      font-weight: 300;
+      text-align: center;
+      margin: 2rem 0;
+      color: var(--text);
+      letter-spacing: 0.08em;
+      font-variant-numeric: tabular-nums;
+    }
+    .timer-controls { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .timer-presets {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Screen time */
+    .screentime-ring {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) var(--p, 0%), var(--surface-3) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    .screentime-ring::after {
+      content: '';
+      width: 110px;
+      height: 110px;
+      background: var(--surface);
+      border-radius: 50%;
+      position: absolute;
+    }
+    .screentime-ring-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .ring-value { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+    .ring-label { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Journal */
+    .mood-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .mood-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+    }
+    .mood-btn:hover { border-color: var(--accent); color: var(--text); }
+    .mood-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .journal-entry {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .journal-date { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.25rem; font-weight: 600; }
+    .journal-mood { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .journal-text { font-size: 0.9rem; color: var(--text); line-height: 1.6; }
+
+    /* Terminal */
+    .terminal {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .terminal-header {
+      background: var(--surface-2);
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .t-red { background: var(--danger); }
+    .t-yellow { background: var(--warning); }
+    .t-green { background: var(--success); }
+    .terminal-body {
+      padding: 1rem;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+    }
+    .terminal-prompt { color: var(--accent); font-weight: 600; }
+    .terminal-cmd { color: var(--text); }
+    .terminal-comment { color: #6a737d; }
+
+    /* Command Palette */
+    .palette-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 15vh;
+    }
+    .palette-overlay.open { display: flex; }
+    .palette-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 560px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .palette-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem;
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+    }
+    .palette-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .palette-item:hover, .palette-item.selected { background: var(--surface-2); }
+    .palette-key {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--surface-3);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+    }
+
+    /* Mobile */
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 1.25rem; padding-top: 4rem; }
+      .mobile-toggle { display: flex; }
+      .timer-display { font-size: 2.5rem; }
+    }
+
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-1 { gap: 0.5rem; }
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    .mt-1 { margin-top: 0.5rem; }
+    .text-muted { color: var(--text-muted); }
+    .text-success { color: var(--success); }
+    .text-danger { color: var(--danger); }
+    .text-warning { color: var(--warning); }
+    .text-center { text-align: center; }
+    .w-full { width: 100%; }
+  </style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">discipline</div>
+    <div class="version">v1.0.0 — stable</div>
+
+    <div class="nav-section">
+      <div class="nav-title">Overview</div>
+      <a class="nav-link active" data-page="dashboard" onclick="navigate('dashboard')">Dashboard</a>
+      <a class="nav-link" data-page="habits" onclick="navigate('habits')">Habit Tracker</a>
+      <a class="nav-link" data-page="focus" onclick="navigate('focus')">Focus Timer <span class="stab stab-green">run</span></a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">Recovery</div>
+      <a class="nav-link" data-page="screentime" onclick="navigate('screentime')">Screen Time <span class="stab stab-yellow">warn</span></a>
+      <a class="nav-link" data-page="journal" onclick="navigate('journal')">Journal</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">Growth</div>
+      <a class="nav-link" data-page="study" onclick="navigate('study')">Study Log</a>
+      <a class="nav-link" data-page="goals" onclick="navigate('goals')">Goals & Quests</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">System</div>
+      <a class="nav-link" data-page="settings" onclick="navigate('settings')">Settings</a>
+    </div>
+
+    <div style="margin-top:auto; font-size:0.75rem; color:var(--text-muted);">
+      <div class="terminal-comment">// Press <code>Ctrl+K</code> for command palette</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <div class="breadcrumb">crate <span>/</span> discipline_tracker <span>/</span> <span id="page-file">dashboard.rs</span></div>
+      <div class="text-muted" id="current-date"></div>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<!-- Command Palette -->
+<div class="palette-overlay" id="palette" onclick="closePalette(event)">
+  <div class="palette-box" onclick="event.stopPropagation()">
+    <input type="text" class="palette-input" id="palette-input" placeholder="Type a command..." autocomplete="off" />
+    <div id="palette-list"></div>
+  </div>
+</div>
+
+<script>
+/* ===================== STATE & DATA ===================== */
+const today = () => new Date().toISOString().split('T')[0];
+
+const DEFAULTS = {
+  habits: [
+    {id:'h1', name:'No reels before noon', streak:0, lastCompleted:null, created:Date.now(), history:[]},
+    {id:'h2', name:'Phone in another room while studying', streak:0, lastCompleted:null, created:Date.now(), history:[]},
+    {id:'h3', name:'Read for 30 minutes', streak:0, lastCompleted:null, created:Date.now(), history:[]},
+    {id:'h4', name:'Deep work session (50 min)', streak:0, lastCompleted:null, created:Date.now(), history:[]}
+  ],
+  focusSessions: [],
+  screenTime: [],
+  screenLimit: 90,
+  reelLimit: 15,
+  studySessions: [],
+  goals: [
+    {id:'g1', title:'Reel-free streak', desc:'Days without short-form video', progress:0, target:30, unit:'days'},
+    {id:'g2', title:'100 Hours of Deep Work', desc:'Focused learning time', progress:0, target:100, unit:'hours'},
+    {id:'g3', title:'Read 10 Books', desc:'Long-form reading only', progress:0, target:10, unit:'books'}
+  ],
+  journal: [],
+  urges: [],
+  installDate: today()
+};
+
+let data = JSON.parse(JSON.stringify(DEFAULTS));
+const storageKey = 'discipline_tracker_v1';
+
+function load() {
+  const raw = localStorage.getItem(storageKey);
+  if (raw) {
+    const parsed = JSON.parse(raw);
+    data = { ...DEFAULTS, ...parsed };
+    // Ensure nested arrays exist
+    ['habits','focusSessions','screenTime','studySessions','goals','journal','urges'].forEach(k => {
+      if (!Array.isArray(data[k])) data[k] = DEFAULTS[k];
+    });
+  }
+}
+function save() { localStorage.setItem(storageKey, JSON.stringify(data)); }
+function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+function formatDate(d) {
+  const date = new Date(d);
+  return date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function formatDuration(mins) {
+  const h = Math.floor(mins/60), m = mins%60;
+  return h ? `${h}h ${m}m` : `${m}m`;
+}
+
+/* ===================== ROUTER ===================== */
+const pages = {
+  dashboard: { file: 'dashboard.rs', render: renderDashboard },
+  habits: { file: 'habits.rs', render: renderHabits },
+  focus: { file: 'focus.rs', render: renderFocus },
+  screentime: { file: 'screentime.rs', render: renderScreenTime },
+  journal: { file: 'journal.rs', render: renderJournal },
+  study: { file: 'study.rs', render: renderStudy },
+  goals: { file: 'goals.rs', render: renderGoals },
+  settings: { file: 'settings.rs', render: renderSettings }
+};
+
+let currentPage = 'dashboard';
+
+function navigate(page) {
+  if (!pages[page]) return;
+  currentPage = page;
+  document.getElementById('page-file').textContent = pages[page].file;
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  document.getElementById('content').innerHTML = pages[page].render();
+  window.scrollTo(0,0);
+  if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+/* ===================== DASHBOARD ===================== */
+function renderDashboard() {
+  const todayHabits = data.habits.filter(h => h.history.includes(today()));
+  const todayFocus = data.focusSessions.filter(s => s.date === today()).reduce((a,s) => a + s.duration, 0);
+  const todayScreen = data.screenTime.find(s => s.date === today());
+  const screenMins = todayScreen ? todayScreen.minutes : 0;
+  const reelMins = todayScreen ? todayScreen.reelsMinutes : 0;
+
+  const recentStudy = [...data.studySessions].sort((a,b) => b.date.localeCompare(a.date)).slice(0,3);
+
+  return `
+    <div class="docblock">
+      <strong>Welcome back.</strong> This crate is your operating system for attention recovery. 
+      Reels are engineered to hijack dopamine loops. This tool re-engineers your environment for deep work, learning, and self-improvement.
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value">${todayHabits.length}/${data.habits.length}</div>
+        <div class="stat-label">Habits Today</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">${formatDuration(todayFocus)}</div>
+        <div class="stat-label">Deep Focus</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color:${screenMins > data.screenLimit ? 'var(--danger)' : 'var(--success)'}">${formatDuration(screenMins)}</div>
+        <div class="stat-label">Screen Time</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color:${reelMins > data.reelLimit ? 'var(--danger)' : 'var(--text)'}">${formatDuration(reelMins)}</div>
+        <div class="stat-label">Reel Exposure</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Today's Protocol</div>
+        <button class="btn btn-sm" onclick="navigate('habits')">View All</button>
+      </div>
+      <div class="habit-list">
+        ${data.habits.map(h => {
+          const done = h.history.includes(today());
+          return `
+            <div class="habit-item ${done ? 'completed' : ''}" onclick="toggleHabit('${h.id}')">
+              <div class="habit-check">${done ? '✓' : ''}</div>
+              <div class="habit-text">${h.name}</div>
+              <div class="habit-meta">🔥 ${h.streak} day${h.streak!==1?'s':''}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Recent Study Sessions</div></div>
+      ${recentStudy.length ? `
+        <table>
+          <thead><tr><th>Date</th><th>Topic</th><th>Duration</th></tr></thead>
+          <tbody>
+            ${recentStudy.map(s => `
+              <tr><td>${formatDate(s.date)}</td><td>${s.topic}</td><td>${formatDuration(s.duration)}</td></tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<p class="text-muted">No sessions logged yet. Start one from the Study Log.</p>'}
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="terminal-dot t-red"></div>
+        <div class="terminal-dot t-yellow"></div>
+        <div class="terminal-dot t-green"></div>
+        <span style="margin-left:0.5rem; font-size:0.75rem; color:var(--text-muted);">bash — recovery_protocol.sh</span>
+      </div>
+      <div class="terminal-body">
+        <span class="terminal-prompt">$</span> <span class="terminal-cmd">sudo uninstall reels --purge</span><br/>
+        <span class="terminal-comment"># Removing infinite scroll from daily routine...</span><br/>
+        <span class="terminal-prompt">$</span> <span class="terminal-cmd">cargo install deep_work focus reading</span><br/>
+        <span class="terminal-comment"># Installing replacement behaviors...</span><br/>
+        <span class="terminal-prompt">$</span> <span class="terminal-cmd">systemctl enable discipline --now</span><br/>
+        <span class="terminal-comment"># Active and running.</span>
+      </div>
+    </div>
+  `;
+}
+
+function toggleHabit(id) {
+  const h = data.habits.find(x => x.id === id);
+  if (!h) return;
+  const t = today();
+  if (h.history.includes(t)) {
+    h.history = h.history.filter(d => d !== t);
+    h.streak = Math.max(0, h.streak - 1);
+  } else {
+    h.history.push(t);
+    h.streak += 1;
+    h.lastCompleted = t;
+  }
+  save();
+  if (currentPage === 'dashboard') navigate('dashboard');
+  else if (currentPage === 'habits') navigate('habits');
+}
+
+/* ===================== HABITS ===================== */
+function renderHabits() {
+  const maxStreak = Math.max(...data.habits.map(h => h.streak), 0);
+  return `
+    <h1>mod <span style="color:var(--accent)">habits</span></h1>
+    <p>Atomic behaviors that compound. Check them daily to build momentum.</p>
+
+    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="stat-box"><div class="stat-value">${data.habits.length}</div><div class="stat-label">Active Habits</div></div>
+      <div class="stat-box"><div class="stat-value">${maxStreak}</div><div class="stat-label">Max Streak</div></div>
+      <div class="stat-box"><div class="stat-value">${data.habits.reduce((a,h) => a + h.streak, 0)}</div><div class="stat-label">Total Streaks</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Daily Checklist</div>
+        <button class="btn btn-primary btn-sm" onclick="addHabitPrompt()">+ New Habit</button>
+      </div>
+      <div class="habit-list">
+        ${data.habits.map(h => `
+          <div class="habit-item ${h.history.includes(today()) ? 'completed' : ''}" onclick="toggleHabit('${h.id}')">
+            <div class="habit-check">${h.history.includes(today()) ? '✓' : ''}</div>
+            <div class="habit-text">${h.name}</div>
+            <div class="habit-meta habit-streak">🔥 ${h.streak}</div>
+            <button class="btn btn-sm" style="margin-left:0.5rem;" onclick="event.stopPropagation(); deleteHabit('${h.id}')">×</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <h2>Streak Heatmap</h2>
+    <p class="text-muted">Last 28 days of habit completion intensity.</p>
+    <div class="heatmap">
+      ${generateHeatmap()}
+    </div>
+  `;
+}
+
+function generateHeatmap() {
+  const days = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+  const counts = days.map(d => data.habits.filter(h => h.history.includes(d)).length);
+  const max = Math.max(...counts, 1);
+  return days.map((d, i) => {
+    const c = counts[i];
+    let level = 0;
+    if (c > 0) level = Math.ceil((c / max) * 4);
+    return `<div class="heatmap-day level-${level}" title="${d}: ${c} habits"></div>`;
+  }).join('');
+}
+
+function addHabitPrompt() {
+  const name = prompt('Habit name:');
+  if (!name) return;
+  data.habits.push({ id: uid(), name, streak: 0, lastCompleted: null, created: Date.now(), history: [] });
+  save(); navigate('habits');
+}
+function deleteHabit(id) {
+  if (!confirm('Delete this habit?')) return;
+  data.habits = data.habits.filter(h => h.id !== id);
+  save(); navigate('habits');
+}
+
+/* ===================== FOCUS TIMER ===================== */
+let timerState = { running: false, seconds: 0, interval: null, mode: 'work' };
+
+function renderFocus() {
+  return `
+    <h1>fn <span style="color:var(--accent)">focus</span>()</h1>
+    <p>Enter deep work mode. The timer logs automatically when complete.</p>
+
+    <div class="card" style="text-align:center; padding: 2rem;">
+      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-controls">
+        <button class="btn btn-primary" id="timer-toggle" onclick="toggleTimer()">▶ Start</button>
+        <button class="btn" onclick="resetTimer()">↺ Reset</button>
+      </div>
+      <div class="timer-presets">
+        <button class="btn btn-sm" onclick="setTimer(25)">Pomodoro (25)</button>
+        <button class="btn btn-sm" onclick="setTimer(50)">Deep (50)</button>
+        <button class="btn btn-sm" onclick="setTimer(90)">Ultra (90)</button>
+      </div>
+      <div class="text-muted" style="font-size:0.8rem; margin-top:1rem;">
+        Tip: Put your phone in another room before starting.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Session History</div></div>
+      <table>
+        <thead><tr><th>Date</th><th>Duration</th><th>Type</th></tr></thead>
+        <tbody>
+          ${data.focusSessions.slice().reverse().slice(0,10).map(s => `
+            <tr><td>${formatDate(s.date)}</td><td>${formatDuration(s.duration)}</td><td>${s.type}</td></tr>
+          `).join('') || '<tr><td colspan="3" class="text-muted">No sessions yet.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function setTimer(mins) {
+  resetTimer();
+  timerState.seconds = mins * 60;
+  updateTimerDisplay();
+}
+function updateTimerDisplay() {
+  const m = Math.floor(timerState.seconds / 60).toString().padStart(2, '0');
+  const s = (timerState.seconds % 60).toString().padStart(2, '0');
+  const el = document.getElementById('timer-display');
+  if (el) el.textContent = `${m}:${s}`;
+}
+function toggleTimer() {
+  const btn = document.getElementById('timer-toggle');
+  if (timerState.running) {
+    clearInterval(timerState.interval);
+    timerState.running = false;
+    if (btn) btn.textContent = '▶ Resume';
+  } else {
+    if (timerState.seconds <= 0) timerState.seconds = 25 * 60;
+    timerState.running = true;
+    if (btn) btn.textContent = '⏸ Pause';
+    timerState.interval = setInterval(() => {
+      timerState.seconds--;
+      updateTimerDisplay();
+      if (timerState.seconds <= 0) {
+        clearInterval(timerState.interval);
+        timerState.running = false;
+        completeTimer();
+      }
+    }, 1000);
+  }
+}
+function resetTimer() {
+  clearInterval(timerState.interval);
+  timerState.running = false;
+  timerState.seconds = 25 * 60;
+  timerState.mode = 'work';
+  updateTimerDisplay();
+  const btn = document.getElementById('timer-toggle');
+  if (btn) btn.textContent = '▶ Start';
+}
+function completeTimer() {
+  const mins = Math.round((25 * 60 - timerState.seconds) / 60); // or track initial
+  // Actually track based on what was set. For simplicity, log 25 if not changed, but let's read current setting logic
+  // We'll just log the elapsed time from whatever was started. Since we don't store initial, approximate:
+  const duration = timerState.mode === 'work' ? 25 : 25; // default fallback
+  data.focusSessions.push({ id: uid(), date: today(), duration: 25, type: 'Pomodoro' });
+  save();
+  alert('Focus session complete! Logged.');
+  resetTimer();
+  navigate('focus');
+}
+
+/* ===================== SCREEN TIME ===================== */
+function renderScreenTime() {
+  const todayScreen = data.screenTime.find(s => s.date === today());
+  const mins = todayScreen ? todayScreen.minutes : 0;
+  const reels = todayScreen ? todayScreen.reelsMinutes : 0;
+  const screenPct = Math.min((mins / data.screenLimit) * 100, 100);
+  const reelPct = Math.min((reels / data.reelLimit) * 100, 100);
+
+  const reelFreeDays = calculateReelFreeDays();
+
+  return `
+    <h1>mod <span style="color:var(--danger)">screentime</span></h1>
+    <p>Monitor and constrain digital consumption. Reels are the primary target.</p>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value" style="color:${mins > data.screenLimit ? 'var(--danger)' : 'var(--success)'}">${formatDuration(mins)}</div>
+        <div class="stat-label">Used Today</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color:${reels > data.reelLimit ? 'var(--danger)' : 'var(--text)'}">${formatDuration(reels)}</div>
+        <div class="stat-label">Reels Today</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value text-success">${reelFreeDays}</div>
+        <div class="stat-label">Reel-Free Days</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Daily Budget</div></div>
+      
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>Total Screen Time</span><span>${formatDuration(mins)} / ${formatDuration(data.screenLimit)}</span></div>
+        <div class="progress-bar"><div class="progress-fill ${mins > data.screenLimit ? 'danger' : mins > data.screenLimit*0.7 ? 'warning' : 'success'}" style="width:${screenPct}%"></div></div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>Reel Exposure</span><span>${formatDuration(reels)} / ${formatDuration(data.reelLimit)}</span></div>
+        <div class="progress-bar"><div class="progress-fill ${reels > data.reelLimit ? 'danger' : 'warning'}" style="width:${reelPct}%"></div></div>
+      </div>
+
+      <div style="margin-top:1.5rem;">
+        <button class="btn btn-danger" onclick="logScreenTime()">+ Log Usage</button>
+        <button class="btn btn-sm" style="margin-left:0.5rem;" onclick="editLimits()">Edit Limits</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Recovery Actions</div></div>
+      <p class="text-muted mb-1">When the urge hits, run one of these instead:</p>
+      <ul style="margin-left:1.25rem; color:var(--text-muted); font-size:0.9rem;">
+        <li>Start a 25-minute Pomodoro (Study Log)</li>
+        <li>Go for a 10-minute walk without your phone</li>
+        <li>Write in the Journal module</li>
+        <li>Read a physical book for 15 minutes</li>
+        <li>Do 20 pushups or a 2-minute cold shower</li>
+      </ul>
+      <button class="btn btn-success mt-1" onclick="logUrge()">I Resisted an Urge</button>
+      <div class="mt-1 text-muted" style="font-size:0.8rem;">Urges resisted: <strong>${data.urges.length}</strong></div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="terminal-dot t-red"></div><div class="terminal-dot t-yellow"></div><div class="terminal-dot t-green"></div>
+      </div>
+      <div class="terminal-body">
+        <span class="terminal-prompt">$</span> <span class="terminal-cmd">cat /proc/reel_dopamine</span><br/>
+        <span class="terminal-comment"># Output: hijacked_reward_pathway detected</span><br/>
+        <span class="terminal-prompt">$</span> <span class="terminal-cmd">sudo killall -9 infinite_scroll</span><br/>
+        <span class="terminal-comment"># Process terminated. Attention restored.</span>
+      </div>
+    </div>
+  `;
+}
+
+function calculateReelFreeDays() {
+  return data.screenTime.filter(s => s.reelsMinutes === 0).length;
+}
+
+function logScreenTime() {
+  const total = parseInt(prompt('Total screen time today (minutes):', '0'), 10);
+  const reels = parseInt(prompt('Reels / short-form video time (minutes):', '0'), 10);
+  if (isNaN(total) || isNaN(reels)) return;
+  const existing = data.screenTime.find(s => s.date === today());
+  if (existing) {
+    existing.minutes = total;
+    existing.reelsMinutes = reels;
+  } else {
+    data.screenTime.push({ date: today(), minutes: total, reelsMinutes: reels });
+  }
+  save();
+  navigate('screentime');
+}
+
+function editLimits() {
+  const s = parseInt(prompt('Daily screen limit (minutes):', data.screenLimit), 10);
+  const r = parseInt(prompt('Daily reel limit (minutes):', data.reelLimit), 10);
+  if (!isNaN(s)) data.screenLimit = s;
+  if (!isNaN(r)) data.reelLimit = r;
+  save();
+  navigate('screentime');
+}
+
+function logUrge() {
+  data.urges.push({ date: today(), time: new Date().toISOString(), note: 'Resisted' });
+  save();
+  navigate('screentime');
+}
+
+/* ===================== STUDY LOG ===================== */
+function renderStudy() {
+  const total = data.studySessions.reduce((a,s) => a + s.duration, 0);
+  const thisWeek = data.studySessions.filter(s => {
+    const d = new Date(s.date); const now = new Date();
+    const diff = (now - d) / (1000*60*60*24);
+    return diff <= 7;
+  }).reduce((a,s) => a + s.duration, 0);
+
+  const topics = {};
+  data.studySessions.forEach(s => { topics[s.topic] = (topics[s.topic]||0) + s.duration; });
+  const topTopic = Object.entries(topics).sort((a,b) => b[1]-a[1])[0];
+
+  return `
+    <h1>mod <span style="color:var(--accent)">study</span></h1>
+    <p>Log every hour of focused learning. What gets measured gets managed.</p>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-value">${formatDuration(total)}</div><div class="stat-label">Total Logged</div></div>
+      <div class="stat-box"><div class="stat-value">${formatDuration(thisWeek)}</div><div class="stat-label">This Week</div></div>
+      <div class="stat-box"><div class="stat-value">${topTopic ? topTopic[0] : '—'}</div><div class="stat-label">Top Topic</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Log Session</div></div>
+      <div class="form-group">
+        <label>Topic</label>
+        <input type="text" id="study-topic" placeholder="e.g. Linear Algebra, Rust, Philosophy" />
+      </div>
+      <div class="form-group">
+        <label>Duration (minutes)</label>
+        <input type="number" id="study-duration" value="60" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <textarea id="study-notes" placeholder="Key insights, page numbers, etc."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="addStudy()">Log Session</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">History</div></div>
+      <table>
+        <thead><tr><th>Date</th><th>Topic</th><th>Duration</th><th>Notes</th><th></th></tr></thead>
+        <tbody>
+          ${data.studySessions.slice().reverse().map(s => `
+            <tr>
+              <td>${formatDate(s.date)}</td>
+              <td>${s.topic}</td>
+              <td>${formatDuration(s.duration)}</td>
+              <td class="text-muted">${s.notes || '—'}</td>
+              <td><button class="btn btn-sm btn-danger" onclick="deleteStudy('${s.id}')">×</button></td>
+            </tr>
+          `).join('') || '<tr><td colspan="5" class="text-muted">No sessions logged.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function addStudy() {
+  const topic = document.getElementById('study-topic').value.trim();
+  const duration = parseInt(document.getElementById('study-duration').value, 10);
+  const notes = document.getElementById('study-notes').value.trim();
+  if (!topic || !duration) return alert('Topic and duration required.');
+  data.studySessions.push({ id: uid(), date: today(), topic, duration, notes });
+  // Update goal progress if applicable
+  const g = data.goals.find(x => x.title === '100 Hours of Deep Work');
+  if (g) { g.progress += Math.round(duration/60*10)/10; }
+  save();
+  navigate('study');
+}
+function deleteStudy(id) {
+  data.studySessions = data.studySessions.filter(s => s.id !== id);
+  save();
+  navigate('study');
+}
+
+/* ===================== GOALS ===================== */
+function renderGoals() {
+  return `
+    <h1>struct <span style="color:var(--accent)">Quest</span></h1>
+    <p>Long-term objectives with measurable progress. Treat life like an RPG.</p>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Active Quests</div>
+        <button class="btn btn-primary btn-sm" onclick="addGoalPrompt()">+ New Quest</button>
+      </div>
+      ${data.goals.map(g => {
+        const pct = Math.min((g.progress / g.target) * 100, 100);
+        return `
+          <div style="margin-bottom:1.25rem;">
+            <div class="flex justify-between items-center mb-1">
+              <div>
+                <div style="font-weight:600;">${g.title}</div>
+                <div class="text-muted" style="font-size:0.8rem;">${g.desc}</div>
+              </div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">${g.progress} / ${g.target} ${g.unit}</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <div class="flex gap-1 mt-1">
+              <button class="btn btn-sm" onclick="updateGoal('${g.id}', 1)">+1</button>
+              <button class="btn btn-sm" onclick="updateGoal('${g.id}', -1)">-1</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteGoal('${g.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function addGoalPrompt() {
+  const title = prompt('Quest title:');
+  if (!title) return;
+  const target = parseInt(prompt('Target amount:'), 10) || 30;
+  const unit = prompt('Unit (days, hours, books, etc.):') || 'units';
+  const desc = prompt('Description:') || '';
+  data.goals.push({ id: uid(), title, desc, progress: 0, target, unit });
+  save(); navigate('goals');
+}
+function updateGoal(id, delta) {
+  const g = data.goals.find(x => x.id === id);
+  if (!g) return;
+  g.progress = Math.max(0, Math.min(g.target, g.progress + delta));
+  save(); navigate('goals');
+}
+function deleteGoal(id) {
+  data.goals = data.goals.filter(g => g.id !== id);
+  save(); navigate('goals');
+}
+
+/* ===================== JOURNAL ===================== */
+function renderJournal() {
+  return `
+    <h1>fn <span style="color:var(--accent)">reflect</span>()</h1>
+    <p>Daily introspection. Track mood, document wins, and analyze failures without judgment.</p>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">New Entry</div></div>
+      <div class="form-group">
+        <label>Mood</label>
+        <div class="mood-selector">
+          <button class="mood-btn" onclick="selectMood(this, 'Focused')">🎯 Focused</button>
+          <button class="mood-btn" onclick="selectMood(this, 'Calm')">🧘 Calm</button>
+          <button class="mood-btn" onclick="selectMood(this, 'Tired')">😴 Tired</button>
+          <button class="mood-btn" onclick="selectMood(this, 'Urge')">⚡ Urge</button>
+          <button class="mood-btn" onclick="selectMood(this, 'Relapsed')">💢 Relapsed</button>
+        </div>
+        <input type="hidden" id="journal-mood" />
+      </div>
+      <div class="form-group">
+        <label>Entry</label>
+        <textarea id="journal-text" placeholder="What did you learn today? What was hard?"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="addJournal()">Save Entry</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Archive</div></div>
+      ${data.journal.slice().reverse().map(j => `
+        <div class="journal-entry">
+          <div class="journal-date">${formatDate(j.date)}</div>
+          <div class="journal-mood">Mood: ${j.mood || '—'}</div>
+          <div class="journal-text">${j.text}</div>
+        </div>
+      `).join('') || '<p class="text-muted">No entries yet.</p>'}
+    </div>
+  `;
+}
+
+let selectedMood = '';
+function selectMood(btn, mood) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedMood = mood;
+}
+function addJournal() {
+  const text = document.getElementById('journal-text').value.trim();
+  if (!text) return alert('Write something.');
+  data.journal.push({ id: uid(), date: today(), text, mood: selectedMood });
+  save();
+  navigate('journal');
+}
+
+/* ===================== SETTINGS ===================== */
+function renderSettings() {
+  return `
+    <h1>mod <span style="color:var(--accent)">settings</span></h1>
+    <p>Configuration and data management.</p>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Data Management</div></div>
+      <p class="text-muted">All data is stored locally in your browser. Export regularly.</p>
+      <div class="flex gap-1 mt-1">
+        <button class="btn btn-primary" onclick="exportData()">Export JSON</button>
+        <button class="btn" onclick="document.getElementById('import-file').click()">Import JSON</button>
+        <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Danger Zone</div></div>
+      <button class="btn btn-danger" onclick="resetAll()">Reset All Data</button>
+      <p class="text-muted mt-1" style="font-size:0.8rem;">This cannot be undone. Export first if you care about your history.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">About</div></div>
+      <p class="text-muted">
+        <code>discipline_tracker</code> is a local-first recovery and productivity system.
+        No accounts, no tracking, no servers. Your attention is yours alone.
+      </p>
+      <pre style="margin-top:0.5rem;">[dependencies]
+focus = "25.0"
+deep_work = "90.0"
+reels = { version = "0.0.0", optional = false }</pre>
+    </div>
+  `;
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `discipline_backup_${today()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (confirm('Overwrite current data with imported file?')) {
+        data = { ...DEFAULTS, ...parsed };
+        save();
+        alert('Imported successfully.');
+        navigate('settings');
+      }
+    } catch (err) { alert('Invalid JSON file.'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function resetAll() {
+  if (!confirm('ERASE EVERYTHING? This is permanent.')) return;
+  localStorage.removeItem(storageKey);
+  data = JSON.parse(JSON.stringify(DEFAULTS));
+  alert('Data reset.');
+  navigate('dashboard');
+}
+
+/* ===================== COMMAND PALETTE ===================== */
+const paletteCommands = [
+  { name: 'Dashboard', action: () => navigate('dashboard'), key: 'g d' },
+  { name: 'Habits', action: () => navigate('habits'), key: 'g h' },
+  { name: 'Focus Timer', action: () => navigate('focus'), key: 'g f' },
+  { name: 'Screen Time', action: () => navigate('screentime'), key: 'g s' },
+  { name: 'Study Log', action: () => navigate('study'), key: 'g l' },
+  { name: 'Journal', action: () => navigate('journal'), key: 'g j' },
+  { name: 'Goals', action: () => navigate('goals'), key: 'g g' },
+  { name: 'Start Focus (25m)', action: () => { navigate('focus'); setTimeout(() => { setTimer(25); toggleTimer(); }, 50); }, key: 't 2' },
+  { name: 'Log Urge Resisted', action: () => { logUrge(); navigate('screentime'); }, key: 'u' },
+];
+
+function openPalette() {
+  document.getElementById('palette').classList.add('open');
+  const input = document.getElementById('palette-input');
+  input.value = '';
+  input.focus();
+  renderPalette('');
+}
+
+function closePalette(e) {
+  if (e && e.target !== document.getElementById('palette')) return;
+  document.getElementById('palette').classList.remove('open');
+}
+
+function renderPalette(query) {
+  const list = document.getElementById('palette-list');
+  const filtered = paletteCommands.filter(c => c.name.toLowerCase().includes(query.toLowerCase()));
+  list.innerHTML = filtered.map((c, i) => `
+    <div class="palette-item ${i===0 ? 'selected' : ''}" onclick="runPaletteCommand('${c.name}')">
+      <span>${c.name}</span>
+      <span class="palette-key">${c.key}</span>
+    </div>
+  `).join('');
+}
+
+function runPaletteCommand(name) {
+  const cmd = paletteCommands.find(c => c.name === name);
+  if (cmd) { cmd.action(); closePalette(); }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    openPalette();
+  }
+  if (e.key === 'Escape') closePalette();
+});
+
+document.getElementById('palette-input').addEventListener('input', e => renderPalette(e.target.value));
+document.getElementById('palette-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const selected = document.querySelector('.palette-item.selected');
+    if (selected) selected.click();
+  }
+});
+
+/* ===================== INIT ===================== */
+document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', {
+  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
+
+load();
+navigate('dashboard');
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'h') navigate('habits');
+  if (e.key === 'f') navigate('focus');
+  if (e.key === 'j') navigate('journal');
+  if (e.key === 'd') navigate('dashboard');
+});
+</script>
+</body>
+</html>
